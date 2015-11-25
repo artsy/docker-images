@@ -1,10 +1,6 @@
-FROM debian:jessie
+FROM buildpack-deps:jessie
 
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
-  ca-certificates \
-  curl \
-  wget \
   mongodb-clients \
-  build-essential \
-  libpq-dev \
+  postgresql-client \
   && rm -rf /var/lib/apt/lists/*
