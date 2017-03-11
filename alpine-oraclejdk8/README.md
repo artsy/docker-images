@@ -1,7 +1,7 @@
 OracleJDK 8 Docker image
 ========================
 
-This image is based on artsy/alpine-glibc amd contains 
+This image is based on artsy/alpine-glibc and contains 
 [OracleJDK 8](http://www.oracle.com/technetwork/java/javase/overview/index.html).
 
 Usage Example
