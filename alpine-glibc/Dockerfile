@@ -7,7 +7,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
     ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
+    apk --update add --no-cache --virtual=.build-dependencies wget ca-certificates openssh && \
     wget \
         "https://raw.githubusercontent.com/andyshinn/alpine-pkg-glibc/master/sgerrand.rsa.pub" \
         -O "/etc/apk/keys/sgerrand.rsa.pub" && \
@@ -27,10 +27,15 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
     apk del glibc-i18n && \
     \
     rm "/root/.wget-hsts" && \
+    mkdir ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && \
     apk del .build-dependencies && \
+    apk add git python py-pip && \
     rm \
         "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
         "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
+        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+    pip install awscli==1.10.20
 
 ENV LANG=C.UTF-8
+
+
