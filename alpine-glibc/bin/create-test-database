@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "create database circleci_test" | psql -U postgres -h localhost
+
