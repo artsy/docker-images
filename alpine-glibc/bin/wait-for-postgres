@@ -1,7 +1,0 @@
-#!/bin/sh
-
-TIMEOUT=5
-until psql -h localhost -U postgres -d template1 -c "select 1" > /dev/null 2>&1 || [ $TIMEOUT -eq 0 ]; do
-  echo "Waiting for postgres server, $((TIMEOUT--)) remaining attempts..."
-  sleep 1
-done

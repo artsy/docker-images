@@ -2,14 +2,11 @@ FROM alpine:3.5
 
 # Here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
 
-ADD bin bin
-
 RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
     ALPINE_GLIBC_PACKAGE_VERSION="2.25-r0" && \
     ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    apk --update add git python py-pip ca-certificates openssh postgresql-client && \
     apk --update add --no-cache --virtual=.build-dependencies wget && \
     wget \
         "https://raw.githubusercontent.com/andyshinn/alpine-pkg-glibc/master/sgerrand.rsa.pub" \
@@ -31,6 +28,7 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
     \
     rm "/root/.wget-hsts" && \
     apk del .build-dependencies && \
+    apk --update add git python py-pip ca-certificates openssh postgresql && \
     mkdir ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && \
     rm \
         "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
