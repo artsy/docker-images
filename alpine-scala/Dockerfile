@@ -11,7 +11,7 @@ ENV SCALA_VERSION=2.11.8 \
 RUN apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
     apk add --no-cache bash && \
     cd "/tmp" && \
-    wget "https://downloads.typesafe.com/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz" && \
+    wget -q "https://downloads.typesafe.com/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz" && \
     tar xzf "scala-${SCALA_VERSION}.tgz" && \
     mkdir "${SCALA_HOME}" && \
     rm "/tmp/scala-${SCALA_VERSION}/bin/"*.bat && \
