@@ -1,8 +1,8 @@
 FROM artsy/alpine-oraclejdk8
 
-ENV SCALA_VERSION=2.11.8 \
+ENV SCALA_VERSION=2.11.11 \
     SCALA_HOME=/usr/share/scala \
-    SBT_VERSION=0.13.11 \
+    SBT_VERSION=0.13.15 \
     SBT_HOME=/usr/local/sbt \
     PATH=${PATH}:${SBT_HOME}/bin
 
