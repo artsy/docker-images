@@ -3,7 +3,7 @@ FROM artsy/graalvm
 ENV SCALA_VERSION=2.12.4 \
     SBT_VERSION=0.13.17
 
-RUN apt-get update -qq && apt-get install -y curl postgresql-client awscli jq
+RUN apt-get update -qq && apt-get install -y curl postgresql-client awscli jq git
 
 RUN cd "/tmp" && \
     curl -q -L -O https://piccolo.link/sbt-${SBT_VERSION}.tgz && \
