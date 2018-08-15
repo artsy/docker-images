@@ -1,4 +1,4 @@
-FROM  bitnami/minideb
+FROM  debian:stretch
 
 ENV   GRAAL_VERSION=1.0.0-rc2
 ENV   GRAAL_CE_URL=https://github.com/oracle/graal/releases/download/vm-${GRAAL_VERSION}/graalvm-ce-${GRAAL_VERSION}-linux-amd64.tar.gz
