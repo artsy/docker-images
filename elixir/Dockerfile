@@ -1,4 +1,4 @@
-FROM bitnami/minideb
+FROM  debian:stretch
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq \
