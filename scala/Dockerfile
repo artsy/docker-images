@@ -16,6 +16,11 @@ RUN apt-get update -qq && apt-get install -y wget curl tar gzip postgresql-clien
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN scala -version && \
-    sbt about && \
-    node -v
+# Trigger compiler-interface compilation
+RUN  cd "/tmp" && \
+  mkdir -p project src/main/scala && \
+  echo "sbt.version = ${SBT_VERSION}" > project/build.properties && \
+  echo "scalaVersion := \"${SCALA_VERSION}\"" > build.sbt && \
+  touch src/main/scala/scratch.scala && \
+  sbt compile && \
+  rm -rf *
