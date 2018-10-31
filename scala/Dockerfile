@@ -1,10 +1,12 @@
-FROM openjdk:8
+FROM artsy/hokusai
 
 ENV SCALA_VERSION=2.12.7 \
-    SBT_VERSION=0.13.17 \
+    SBT_VERSION=1.2.6 \
     DOCKERIZE_VERSION=v0.6.1
 
-RUN apt-get update -qq && apt-get install -y wget curl tar gzip postgresql-client awscli jq && \
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends wget curl tar gzip postgresql-client awscli jq\
+                                               openjdk-8-jdk ca-certificates-java && \
     cd "/tmp" && \
     wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && \
@@ -14,6 +16,8 @@ RUN apt-get update -qq && apt-get install -y wget curl tar gzip postgresql-clien
     dpkg -i sbt-$SBT_VERSION.deb && \
     curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get install -y nodejs && \
+    ls /usr/bin/p* && \
+    pip2 install hokusai && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Trigger compiler-interface compilation
