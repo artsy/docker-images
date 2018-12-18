@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-slim
+FROM artsy/openjdk:corretto8-jre
 
 ENV LANG C.UTF-8
 
