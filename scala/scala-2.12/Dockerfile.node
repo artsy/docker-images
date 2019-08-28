@@ -1,0 +1,5 @@
+FROM artsy/scala:2.12
+
+RUN curl --silent --location https://rpm.nodesource.com/setup_10.x | bash -
+RUN yum -y install nodejs python2 python2-pip && yum clean all
+RUN pip2 install hokusai
