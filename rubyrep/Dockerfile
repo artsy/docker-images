@@ -6,6 +6,4 @@ RUN unzip /tmp/rubyrep-2.0.1.zip -d /
 
 WORKDIR /rubyrep-2.0.1
 
-ADD default.conf default.conf
-
-CMD ["/rubyrep-2.0.1/rubyrep", "--verbose", "scan", "-c", "/rubyrep-2.0.1/default.conf", "--summary"]
+CMD ["/rubyrep-2.0.1/rubyrep", "--verbose", "scan", "-c", "/mnt/default.conf", "--summary"]
