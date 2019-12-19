@@ -33,7 +33,7 @@ fi
 start_datetime=$(date -u +"%D %T %Z")
 echo "[data export] Starting at $start_datetime"
 
-pg_dump -O -Fc -d $DATABASE_URL -f archive.pgdump ${@:2}
+pg_dump -O -Fc -d $DATABASE_URL -f archive.pgdump
 
 aws s3 cp archive.pgdump s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump
 

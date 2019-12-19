@@ -35,7 +35,7 @@ echo "[data export] Starting at $start_datetime"
 
 aws s3 cp s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump archive.pgdump
 
-pg_restore archive.pgdump -O -x -d $DATABASE_URL ${@:2}
+pg_restore archive.pgdump -O -x -d $DATABASE_URL
 
 end_datetime=$(date -u +"%D %T %Z")
 echo "[data export] Ended at $end_datetime"
