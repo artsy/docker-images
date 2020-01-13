@@ -12,8 +12,12 @@ Set the env vars `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` with credential
 
 ## Export
 
-Invoke `./export-db.sh` with the name of the archive (i.e. "staging" or "latest") to create in S3 - additional arguments are passed to `pg_dump`
+- Invoke `./export-db.sh` with the name of the archive as an argument (i.e. "staging" or "latest") providing the filename to create in S3.
+
+- Optionally provide a second argument as a quoted string to override the default export options "-O -Fc"
 
 ## Import
 
-Invoke `./import-db.sh` with the name of the archive (i.e. "staging" or "latest") to restore from S3 - additional arguments are passed to `pg_restore`
+- Invoke `./import-db.sh` with the name of the archive as an argument (i.e. "staging" or "latest") providing the filename to restore from S3.
+
+- Optionally provide a second argument as a quoted string to override the default import options "--clean --no-owner --no-privileges --schema=public"
