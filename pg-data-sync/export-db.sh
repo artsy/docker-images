@@ -12,6 +12,13 @@ fi
 
 ARCHIVE_NAME=$1
 
+if test -z "$2"
+then
+  PG_DUMP_ARGS="-O -Fc"
+else
+  PG_DUMP_ARGS=$2
+fi
+
 if test -z "$DATABASE_URL"
 then
   echo "This script creates an archive from DATABASE_URL so it must be set!"
@@ -33,7 +40,7 @@ fi
 start_datetime=$(date -u +"%D %T %Z")
 echo "[data export] Starting at $start_datetime"
 
-pg_dump -O -Fc -d $DATABASE_URL -f archive.pgdump
+pg_dump -d $DATABASE_URL -f archive.pgdump $PG_DUMP_ARGS
 
 aws s3 cp archive.pgdump s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump
 
