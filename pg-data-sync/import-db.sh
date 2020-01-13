@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./export-db.sh { ARCHIVE_NAME } { PG_RESTORE_ARGS }
+# Usage: ./import-db.sh { ARCHIVE_NAME } { PG_RESTORE_ARGS }
 
 set -e
 
@@ -11,6 +11,13 @@ then
 fi
 
 ARCHIVE_NAME=$1
+
+if test -z "$2"
+then
+  PG_RESTORE_ARGS="--clean --no-owner --no-privileges"
+else
+  PG_RESTORE_ARGS=$2
+fi
 
 if test -z "$DATABASE_URL"
 then
@@ -35,7 +42,7 @@ echo "[data export] Starting at $start_datetime"
 
 aws s3 cp s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump archive.pgdump
 
-pg_restore archive.pgdump --clean --no-owner --no-privileges -d $DATABASE_URL
+pg_restore archive.pgdump -d $DATABASE_URL $PG_RESTORE_ARGS
 
 end_datetime=$(date -u +"%D %T %Z")
 echo "[data export] Ended at $end_datetime"
