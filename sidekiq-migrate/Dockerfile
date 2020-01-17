@@ -4,4 +4,4 @@ RUN gem install redis json
 
 COPY migrate.rb /migrate.rb
 
-CMD ["ruby" "migrate.rb"]
+CMD ["/usr/local/bin/ruby" "/migrate.rb"]
