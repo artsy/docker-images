@@ -36,7 +36,7 @@ old_redis.smembers('queues').each do |q|
   puts "Queue [#{q}] remaining_jobs: #{old_redis.llen(rqn)}"
 end
 
-%w[retry schedule].each do |set_type|
+%w[retry schedule dead].each do |set_type|
   puts "Migrating set #{set_type}..."
 
   moved_jobs_counter = Hash.new(0)
