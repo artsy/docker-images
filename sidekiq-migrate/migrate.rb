@@ -20,14 +20,14 @@ old_redis.smembers('queues').each do |q|
       job_json = old_redis.rpop(rqn)
       new_redis.lpush(rqn, job_json)
       job_hash = JSON.parse(job_json)
-      moved_jobs_counter[job_hash['class']] += 1
+      moved_jobs_counter[job_hash['class']] += 1 if actual_run
     end
   else
     queue_items = old_redis.lrange(rqn, 0, -1)
     queue_items.each do |job_json|
       new_redis.lpush(rqn, job_json) if actual_run
       job_hash = JSON.parse(job_json)
-      moved_jobs_counter[job_hash['class']] += 1
+      moved_jobs_counter[job_hash['class']] += 1 if actual_run
     end
   end
 
@@ -46,7 +46,7 @@ end
     new_redis.zadd(set_type, run_at, job_json) if actual_run
     old_redis.zrem(set_type, job_json) if actual_run and clean_up
     job_hash = JSON.parse(job_json)
-    moved_jobs_counter[job_hash['class']] += 1
+    moved_jobs_counter[job_hash['class']] += 1 if actual_run
   end
 
   puts "JobSet [#{set_type}] moved:"
