@@ -58,5 +58,15 @@ end
   puts "JobSet [#{set_type}] remaining jobs: #{old_redis.zrange(set_type, 0, -1).size}"
 end
 
+stats = old_redis.keys("stat:*")
+stats.each do |k|
+  puts "Migrating stats..."
+  v = old_redis.get(k)
+  puts "#{k} #{v}" if debug
+  new_redis.set(v) if actual_run
+  old_redis.del(k) if actual_run and clean_up
+  puts "Migrated #{stats.length} stats"
+end
+
 time_taken_ms = (1000 * (Time.now.to_f - start_time)).ceil
 puts "Completed migration in #{time_taken_ms} milliseconds."
