@@ -9,12 +9,14 @@ new_redis = Redis.new(url: ENV.fetch('SIDEKIQ_NEW_REDIS_URL'))
 actual_run = (ENV['ACTUAL_RUN'].to_s.downcase == 'true') # actutally migrate keys
 clean_up = (ENV['CLEAN_UP'].to_s.downcase == 'true') # clean up keys in old redis (only applies if actual_run is also true)
 debug = (ENV['DEBUG'].to_s.downcase == 'true')
+migrate_stats = (ENV['MIGRATE_STATS'].to_s.downcase == 'true')
 
-puts "Migrating from #{old_redis} to #{new_redis}"
-puts "=== DRY RUN ===" unless actual_run
-
-old_redis.smembers('queues').each do |q|
-  puts "Migrating queue #{q}..."
+puts "\nMigrating from #{ENV.fetch('SIDEKIQ_OLD_REDIS_URL')} to #{ENV.fetch('SIDEKIQ_NEW_REDIS_URL')}"
+puts "\n=== DRY RUN ===" unless actual_run
+puts "\n\nMigrating queues..."
+queues = old_redis.smembers('queues')
+queues.each do |q|
+  puts "\nMigrating queue #{q}..."
 
   moved_jobs_counter = Hash.new(0)
   rqn = "queue:#{q}"
@@ -35,13 +37,16 @@ old_redis.smembers('queues').each do |q|
     end
   end
 
-  puts "Queue [#{q}] moved:"
+  puts "\nQueue [#{q}] moved:"
   moved_jobs_counter.each { |k, c| puts "  #{k} => #{c}" }
   puts "Queue [#{q}] remaining_jobs: #{old_redis.llen(rqn)}"
 end
 
+puts "Migrated #{queues.length} queues"
+
+puts "\n\nMigrating sets..."
 %w[retry schedule dead].each do |set_type|
-  puts "Migrating set #{set_type}..."
+  puts "\nMigrating set #{set_type}..."
 
   moved_jobs_counter = Hash.new(0)
   set_jobs = old_redis.zrange(set_type, 0, -1, with_scores: true)
@@ -53,20 +58,22 @@ end
     moved_jobs_counter[JSON.parse(job_json)['class']] += 1 if actual_run
   end
 
-  puts "JobSet [#{set_type}] moved:"
+  puts "\nJobSet [#{set_type}] moved:"
   moved_jobs_counter.each { |k, c| puts "  #{k} => #{c}" }
   puts "JobSet [#{set_type}] remaining jobs: #{old_redis.zrange(set_type, 0, -1).size}"
 end
 
-stats = old_redis.keys("stat:*")
-stats.each do |k|
-  puts "Migrating stats..."
-  v = old_redis.get(k)
-  puts "#{k} #{v}" if debug
-  new_redis.set(v) if actual_run
-  old_redis.del(k) if actual_run and clean_up
+if migrate_stats
+  puts "\n\nMigrating stats..."
+  stats = old_redis.keys("stat:*")
+  stats.each do |k|
+    v = old_redis.get(k)
+    puts "#{k} #{v}" if debug
+    new_redis.set(k, v) if actual_run
+    old_redis.del(k) if actual_run and clean_up
+  end
   puts "Migrated #{stats.length} stats"
 end
 
 time_taken_ms = (1000 * (Time.now.to_f - start_time)).ceil
-puts "Completed migration in #{time_taken_ms} milliseconds."
+puts "\n\nCompleted migration in #{time_taken_ms} milliseconds.\n\n"
