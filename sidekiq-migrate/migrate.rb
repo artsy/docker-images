@@ -20,7 +20,7 @@ queues.each do |q|
   moved_jobs_counter = Hash.new(0)
   rqn = "queue:#{q}"
 
-  unless dry_run and clean_up
+  if !dry_run && clean_up
     old_redis.llen(rqn).times do
       job_json = old_redis.rpop(rqn)
       puts job_json if debug
@@ -53,7 +53,7 @@ puts "\n\nMigrating sets..."
   set_jobs.each do |job_json, run_at|
     puts job_json if debug
     new_redis.zadd(set_type, run_at, job_json) unless dry_run
-    old_redis.zrem(set_type, job_json) unless dry_run or not clean_up
+    old_redis.zrem(set_type, job_json) if !dry_run && clean_up
     moved_jobs_counter[JSON.parse(job_json)['class']] += 1 unless dry_run
   end
 
@@ -68,7 +68,7 @@ stats.each do |k|
   v = old_redis.get(k)
   puts "#{k} #{v}" if debug
   new_redis.set(k, v) unless dry_run
-  old_redis.del(k) unless dry_run or not clean_up
+  old_redis.del(k) if !dry_run && clean_up
 end
 puts "Migrated #{stats.length} stats"
 
