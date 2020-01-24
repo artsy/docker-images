@@ -15,10 +15,10 @@ If *only* these are supplied, `migrate.rb` will make a dry run
 
 ### Optional enviornment variables:
 
-- `ACTUAL_RUN`
+- `DRY_RUN`
 
-If set to "true", `migrate.rb` will copy all queues and retry / scheduled sets to the new Redis instance
+If set to "true", `migrate.rb` will print a summary of queues, retry / scheduled sets and stats to the new Redis instance
 
 - `CLEAN_UP`
 
-If also set to "true", `migrate.rb` will remove they keys in the old Redis (only applies when `ACTUAL_RUN` is also true)
+If set to "true", `migrate.rb` will remove the keys in the old Redis database
