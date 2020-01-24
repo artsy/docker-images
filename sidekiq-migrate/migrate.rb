@@ -9,7 +9,6 @@ new_redis = Redis.new(url: ENV.fetch('SIDEKIQ_NEW_REDIS_URL'))
 dry_run = (ENV['DRY_RUN'].to_s.downcase == 'true') # print a summary but don't migrate
 clean_up = (ENV['CLEAN_UP'].to_s.downcase == 'true') # clean up keys in the old redis database
 debug = (ENV['DEBUG'].to_s.downcase == 'true') # debug logging
-migrate_stats = (ENV['MIGRATE_STATS'].to_s.downcase == 'true')
 
 puts "\nMigrating from #{ENV.fetch('SIDEKIQ_OLD_REDIS_URL')} to #{ENV.fetch('SIDEKIQ_NEW_REDIS_URL')}"
 puts "\n=== DRY RUN ===" if dry_run
@@ -63,17 +62,15 @@ puts "\n\nMigrating sets..."
   puts "JobSet [#{set_type}] remaining jobs: #{old_redis.zrange(set_type, 0, -1).size}"
 end
 
-if migrate_stats
-  puts "\n\nMigrating stats..."
-  stats = old_redis.keys("stat:*")
-  stats.each do |k|
-    v = old_redis.get(k)
-    puts "#{k} #{v}" if debug
-    new_redis.set(k, v) unless dry_run
-    old_redis.del(k) unless dry_run or not clean_up
-  end
-  puts "Migrated #{stats.length} stats"
+puts "\n\nMigrating stats..."
+stats = old_redis.keys("stat:*")
+stats.each do |k|
+  v = old_redis.get(k)
+  puts "#{k} #{v}" if debug
+  new_redis.set(k, v) unless dry_run
+  old_redis.del(k) unless dry_run or not clean_up
 end
+puts "Migrated #{stats.length} stats"
 
 time_taken_ms = (1000 * (Time.now.to_f - start_time)).ceil
 puts "\n\nCompleted migration in #{time_taken_ms} milliseconds.\n\n"
