@@ -6,13 +6,12 @@ start_time = Time.now.to_f
 old_redis = Redis.new(url: ENV.fetch('SIDEKIQ_OLD_REDIS_URL'))
 new_redis = Redis.new(url: ENV.fetch('SIDEKIQ_NEW_REDIS_URL'))
 
-actual_run = (ENV['ACTUAL_RUN'].to_s.downcase == 'true') # actutally migrate keys
-clean_up = (ENV['CLEAN_UP'].to_s.downcase == 'true') # clean up keys in old redis (only applies if actual_run is also true)
-debug = (ENV['DEBUG'].to_s.downcase == 'true')
-migrate_stats = (ENV['MIGRATE_STATS'].to_s.downcase == 'true')
+dry_run = (ENV['DRY_RUN'].to_s.downcase == 'true') # print a summary but don't migrate
+clean_up = (ENV['CLEAN_UP'].to_s.downcase == 'true') # clean up keys in the old redis database
+debug = (ENV['DEBUG'].to_s.downcase == 'true') # debug logging
 
 puts "\nMigrating from #{ENV.fetch('SIDEKIQ_OLD_REDIS_URL')} to #{ENV.fetch('SIDEKIQ_NEW_REDIS_URL')}"
-puts "\n=== DRY RUN ===" unless actual_run
+puts "\n=== DRY RUN ===" if dry_run
 puts "\n\nMigrating queues..."
 queues = old_redis.smembers('queues')
 queues.each do |q|
@@ -21,7 +20,7 @@ queues.each do |q|
   moved_jobs_counter = Hash.new(0)
   rqn = "queue:#{q}"
 
-  if actual_run and clean_up
+  if !dry_run && clean_up
     old_redis.llen(rqn).times do
       job_json = old_redis.rpop(rqn)
       puts job_json if debug
@@ -32,8 +31,8 @@ queues.each do |q|
     queue_items = old_redis.lrange(rqn, 0, -1)
     queue_items.each do |job_json|
       puts job_json if debug
-      new_redis.lpush(rqn, job_json) if actual_run
-      moved_jobs_counter[JSON.parse(job_json)['class']] += 1 if actual_run
+      new_redis.lpush(rqn, job_json) unless dry_run
+      moved_jobs_counter[JSON.parse(job_json)['class']] += 1 unless dry_run
     end
   end
 
@@ -53,9 +52,9 @@ puts "\n\nMigrating sets..."
 
   set_jobs.each do |job_json, run_at|
     puts job_json if debug
-    new_redis.zadd(set_type, run_at, job_json) if actual_run
-    old_redis.zrem(set_type, job_json) if actual_run and clean_up
-    moved_jobs_counter[JSON.parse(job_json)['class']] += 1 if actual_run
+    new_redis.zadd(set_type, run_at, job_json) unless dry_run
+    old_redis.zrem(set_type, job_json) if !dry_run && clean_up
+    moved_jobs_counter[JSON.parse(job_json)['class']] += 1 unless dry_run
   end
 
   puts "\nJobSet [#{set_type}] moved:"
@@ -63,17 +62,15 @@ puts "\n\nMigrating sets..."
   puts "JobSet [#{set_type}] remaining jobs: #{old_redis.zrange(set_type, 0, -1).size}"
 end
 
-if migrate_stats
-  puts "\n\nMigrating stats..."
-  stats = old_redis.keys("stat:*")
-  stats.each do |k|
-    v = old_redis.get(k)
-    puts "#{k} #{v}" if debug
-    new_redis.set(k, v) if actual_run
-    old_redis.del(k) if actual_run and clean_up
-  end
-  puts "Migrated #{stats.length} stats"
+puts "\n\nMigrating stats..."
+stats = old_redis.keys("stat:*")
+stats.each do |k|
+  v = old_redis.get(k)
+  puts "#{k} #{v}" if debug
+  new_redis.set(k, v) unless dry_run
+  old_redis.del(k) if !dry_run && clean_up
 end
+puts "Migrated #{stats.length} stats"
 
 time_taken_ms = (1000 * (Time.now.to_f - start_time)).ceil
 puts "\n\nCompleted migration in #{time_taken_ms} milliseconds.\n\n"
