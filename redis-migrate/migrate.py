@@ -8,6 +8,7 @@ from termcolor import cprint
 
 DEBUG = os.environ.get("DEBUG")
 DRY_RUN = os.environ.get("DRY_RUN")
+CLEAN_UP = os.environ.get("CLEAN_UP")
 
 if os.environ.get("REPLACE_DST_KEYS"):
     REPLACE_DST_KEYS = True
@@ -78,7 +79,10 @@ def migrate_redis(source, destination):
             except (redis.exceptions.ResponseError, redis.exceptions.DataError):
                 cprint("! Failed to restore key: %s" % key, 'red')
                 errors += 1
-                pass
+                continue # Don't delete the key in src if it failed to restore - move on to the next iteration
+            if CLEAN_UP:
+                src.delete(key)
+
     if DRY_RUN:
         cprint("Migrated %d keys" % (len(keys) - errors), 'yellow')
     else:

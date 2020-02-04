@@ -16,5 +16,7 @@ Set the env var `DRY_RUN=1` to make a dry run
 
 Set the env var `REPLACE_DST_KEYS=1` to force overwrite of keys in the destination database - otherwise if a key already exists, restore fails to overwrite an existing key and an error message is printed
 
+Set the env var `CLEAN_UP=1` to delete keys in the source database if sucessfully migrated to the destination database
+
 
 Credit goes to @josegonzalez for the source code in [this gist](https://gist.github.com/josegonzalez/6049a72cb163337a18102743061dfcac) - just made some slight tweaks and packaged it up here so to be able to run in container environments
