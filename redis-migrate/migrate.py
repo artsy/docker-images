@@ -84,7 +84,7 @@ def migrate_redis(source, destination):
                 src.delete(key)
 
     if DRY_RUN:
-        cprint("Migrated %d keys" % (len(keys) - errors), 'yellow')
+        cprint("Migrated %d keys << DRY RUN >>" % (len(keys) - errors), 'yellow')
     else:
         cprint("Migrated %d keys" % (len(keys) - errors), 'green')
 
