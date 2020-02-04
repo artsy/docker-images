@@ -53,7 +53,7 @@ def migrate_redis(source, destination):
             try:
                 # TTL command returns the key's ttl value in seconds but restore expects it in milliseconds!
                 dst.restore(key, ttl * 1000, value, replace=REPLACE_DST_KEYS)
-            except redis.exceptions.ResponseError:
+            except (redis.exceptions.ResponseError, redis.exceptions.DataError):
                 cprint("! Failed to restore key: %s" % key, 'red')
                 errors += 1
                 pass
