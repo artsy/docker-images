@@ -52,7 +52,10 @@ def conn_string_type(string):
 
 
 def migrate_redis(source, destination):
-    cprint("Migrating %s:%s/%s to %s:%s/%s..." % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db']), 'green')
+    if DRY_RUN:
+        cprint("Migrating %s:%s/%s to %s:%s/%s << DRY RUN >>..." % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db']), 'yellow')
+    else:
+        cprint("Migrating %s:%s/%s to %s:%s/%s..." % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db']), 'green')
 
     src = connect_redis(source)
     dst = connect_redis(destination)
@@ -63,10 +66,10 @@ def migrate_redis(source, destination):
         # we handle TTL command returning -1 (no expire) or -2 (no key)
         if ttl < 0:
             ttl = 0
-        if DEBUG or DRY_RUN:
+        if DEBUG:
             cprint("Dumping key: %s with TTL %ss" % (key, ttl), 'yellow')
         value = src.dump(key)
-        if DEBUG or DRY_RUN:
+        if DEBUG:
             cprint("Restoring key: %s with TTL %sms" % (key, ttl * 1000), 'yellow')
         if not DRY_RUN:
             try:
@@ -76,7 +79,10 @@ def migrate_redis(source, destination):
                 cprint("! Failed to restore key: %s" % key, 'red')
                 errors += 1
                 pass
-    cprint("Migrated %d keys" % (len(keys) - errors), 'green')
+    if DRY_RUN:
+        cprint("Migrated %d keys" % (len(keys) - errors), 'yellow')
+    else:
+        cprint("Migrated %d keys" % (len(keys) - errors), 'green')
 
 
 def run():
