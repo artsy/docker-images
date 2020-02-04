@@ -2,6 +2,7 @@
 
 import os
 import argparse
+from urlparse import urlparse
 import redis
 from termcolor import cprint
 
@@ -21,13 +22,30 @@ def connect_redis(conn_dict):
 
 
 def conn_string_type(string):
-    format = '<host>:<port>/<db>'
+    format = 'redis://<host>:<port>/<db>'
+    url = urlparse(string)
+
+    if url.scheme != "redis":
+        raise argparse.ArgumentTypeError('incorrect format, should be: %s' % format)
+
+    host = url.hostname
+
+    if url.port:
+        port = url.port
+    else:
+        port = "6379"
+
+    if url.path:
+        db = url.path.strip("/")
+    else:
+        db = "0"
+
     try:
-        host, portdb = string.split(':')
-        port, db = portdb.split('/')
+        port = int(port)
         db = int(db)
     except ValueError:
         raise argparse.ArgumentTypeError('incorrect format, should be: %s' % format)
+
     return {'host': host,
             'port': port,
             'db': db}
@@ -35,6 +53,7 @@ def conn_string_type(string):
 
 def migrate_redis(source, destination):
     cprint("Migrating %s:%s/%s to %s:%s/%s..." % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db']), 'green')
+
     src = connect_redis(source)
     dst = connect_redis(destination)
     keys = src.keys('*')

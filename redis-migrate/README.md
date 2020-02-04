@@ -4,9 +4,9 @@ Utility for migrating all Redis keys to a new instance when you can't use MIGRAT
 
 ## Use
 
-`docker run artsy/redis-migrate:latest` `SOURCE_REDIS` `DESTINATION_REDIS`
+`docker run artsy/redis-migrate:latest` `SOURCE_REDIS_URL` `DESTINATION_REDIS_URL`
 
-`SOURCE_REDIS` / `DESTINATION_REDIS` should be in the form of `host:port/database`, i.e. `localhost:6379/0`
+`SOURCE_REDIS_URL` / `DESTINATION_REDIS_URL` should be in the form of `redis://host:port/database`, i.e. `redis://localhost:6379/0`
 
 ### Additional environment options
 
