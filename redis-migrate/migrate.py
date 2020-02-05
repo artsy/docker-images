@@ -54,9 +54,13 @@ def conn_string_type(string):
 
 def migrate_redis(source, destination):
     if DRY_RUN:
-        cprint("Migrating %s:%s/%s to %s:%s/%s << DRY RUN >>..." % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db']), 'yellow')
+        output_color = 'yellow'
+        log_suffix = ' << DRY_RUN >>'
     else:
-        cprint("Migrating %s:%s/%s to %s:%s/%s..." % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db']), 'green')
+        output_color = 'green'
+        log_suffix = ''
+
+    cprint("Migrating %s:%s/%s to %s:%s/%s...%s" % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db'], log_suffix), output_color)
 
     src = connect_redis(source)
     dst = connect_redis(destination)
@@ -67,12 +71,12 @@ def migrate_redis(source, destination):
         # we handle TTL command returning -1 (no expire) or -2 (no key)
         if ttl < 0:
             ttl = 0
-        if DEBUG:
-            cprint("Dumping key: %s with TTL %ss" % (key, ttl), 'yellow')
+        if DEBUG or DRY_RUN:
+            cprint("Dumping key: %s with TTL %ss%s" % (key, ttl, log_suffix), output_color)
         value = src.dump(key)
-        if DEBUG:
-            cprint("Restoring key: %s with TTL %sms" % (key, ttl * 1000), 'yellow')
         if not DRY_RUN:
+            if DEBUG:
+                cprint("Restoring key: %s with TTL %sms" % (key, ttl * 1000), output_color)
             try:
                 # TTL command returns the key's ttl value in seconds but restore expects it in milliseconds!
                 dst.restore(key, ttl * 1000, value, replace=REPLACE_DST_KEYS)
@@ -81,12 +85,12 @@ def migrate_redis(source, destination):
                 errors += 1
                 continue # Don't delete the key in src if it failed to restore - move on to the next iteration
             if CLEAN_UP:
+                if DEBUG:
+                    cprint("Deleting source key: %s" % key, output_color)
                 src.delete(key)
 
-    if DRY_RUN:
-        cprint("Migrated %d keys << DRY RUN >>" % (len(keys) - errors), 'yellow')
-    else:
-        cprint("Migrated %d keys" % (len(keys) - errors), 'green')
+    if not DRY_RUN:
+        cprint("Migrated %d keys" % (len(keys) - errors), output_color)
 
 
 def run():
