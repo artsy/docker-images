@@ -38,11 +38,11 @@ then
 fi
 
 start_datetime=$(date -u +"%D %T %Z")
-echo "[data export] Starting at $start_datetime"
+echo "[data import] Starting at $start_datetime"
 
 aws s3 cp s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump archive.pgdump
 
 pg_restore archive.pgdump -d $DATABASE_URL $PG_RESTORE_ARGS
 
 end_datetime=$(date -u +"%D %T %Z")
-echo "[data export] Ended at $end_datetime"
+echo "[data import] Ended at $end_datetime"

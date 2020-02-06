@@ -1,6 +1,6 @@
 # Mongo Data-Sync
 
-Dockerfile and scripts for exporting and importing Postgres databases
+Dockerfile and scripts for exporting and importing Mongo databases
 
 # Use
 
