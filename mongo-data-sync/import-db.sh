@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./import-db.sh { ARCHIVE_NAME } { PG_RESTORE_ARGS }
+# Usage: ./import-db.sh { ARCHIVE_NAME }
 
 set -e
 
@@ -12,16 +12,9 @@ fi
 
 ARCHIVE_NAME=$1
 
-if test -z "$2"
+if test -z "$MONGOHQ_URL"
 then
-  PG_RESTORE_ARGS="--clean --no-owner --no-privileges --schema=public"
-else
-  PG_RESTORE_ARGS=$2
-fi
-
-if test -z "$DATABASE_URL"
-then
-  echo "This script restores an archive from DATABASE_URL so it must be set!"
+  echo "This script restores an archive from MONGOHQ_URL so it must be set!"
   exit 1
 fi
 
@@ -40,9 +33,9 @@ fi
 start_datetime=$(date -u +"%D %T %Z")
 echo "[data import] Starting at $start_datetime"
 
-aws s3 cp s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump archive.pgdump
+aws s3 cp s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.tar.gz archive.tar.gz
 
-pg_restore archive.pgdump -d $DATABASE_URL $PG_RESTORE_ARGS
+mongorestore --uri="$MONGOHQ_URL" --stopOnError --drop --gzip --archive=archive.tar.gz
 
 end_datetime=$(date -u +"%D %T %Z")
 echo "[data import] Ended at $end_datetime"
