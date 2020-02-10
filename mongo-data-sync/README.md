@@ -2,6 +2,8 @@
 
 Dockerfile and scripts for exporting and importing Mongo databases
 
+Changes to this directory must be [built and pushed to Docker Hub](https://github.com/artsy/docker-images#adding-an-image-to-docker-hub).
+
 # Use
 
 Set the env var `APP_NAME` to the name of your application
