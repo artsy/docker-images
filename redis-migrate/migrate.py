@@ -2,11 +2,13 @@
 
 import os
 import argparse
+from urlparse import urlparse
 import redis
 from termcolor import cprint
 
 DEBUG = os.environ.get("DEBUG")
 DRY_RUN = os.environ.get("DRY_RUN")
+CLEAN_UP = os.environ.get("CLEAN_UP")
 
 if os.environ.get("REPLACE_DST_KEYS"):
     REPLACE_DST_KEYS = True
@@ -21,20 +23,45 @@ def connect_redis(conn_dict):
 
 
 def conn_string_type(string):
-    format = '<host>:<port>/<db>'
+    format = 'redis://<host>:<port>/<db>'
+    url = urlparse(string)
+
+    if url.scheme != "redis":
+        raise argparse.ArgumentTypeError('incorrect format, should be: %s' % format)
+
+    host = url.hostname
+
+    if url.port:
+        port = url.port
+    else:
+        port = "6379"
+
+    if url.path:
+        db = url.path.strip("/")
+    else:
+        db = "0"
+
     try:
-        host, portdb = string.split(':')
-        port, db = portdb.split('/')
+        port = int(port)
         db = int(db)
     except ValueError:
         raise argparse.ArgumentTypeError('incorrect format, should be: %s' % format)
+
     return {'host': host,
             'port': port,
             'db': db}
 
 
 def migrate_redis(source, destination):
-    cprint("Migrating %s:%s/%s to %s:%s/%s..." % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db']), 'green')
+    if DRY_RUN:
+        output_color = 'yellow'
+        log_suffix = ' << DRY_RUN >>'
+    else:
+        output_color = 'green'
+        log_suffix = ''
+
+    cprint("Migrating %s:%s/%s to %s:%s/%s...%s" % (source['host'], source['port'], source['db'], destination['host'], destination['port'], destination['db'], log_suffix), output_color)
+
     src = connect_redis(source)
     dst = connect_redis(destination)
     keys = src.keys('*')
@@ -45,19 +72,25 @@ def migrate_redis(source, destination):
         if ttl < 0:
             ttl = 0
         if DEBUG or DRY_RUN:
-            cprint("Dumping key: %s with TTL %ss" % (key, ttl), 'yellow')
+            cprint("Dumping key: %s with TTL %ss%s" % (key, ttl, log_suffix), output_color)
         value = src.dump(key)
-        if DEBUG or DRY_RUN:
-            cprint("Restoring key: %s with TTL %sms" % (key, ttl * 1000), 'yellow')
         if not DRY_RUN:
+            if DEBUG:
+                cprint("Restoring key: %s with TTL %sms" % (key, ttl * 1000), output_color)
             try:
                 # TTL command returns the key's ttl value in seconds but restore expects it in milliseconds!
                 dst.restore(key, ttl * 1000, value, replace=REPLACE_DST_KEYS)
-            except redis.exceptions.ResponseError:
+            except (redis.exceptions.ResponseError, redis.exceptions.DataError):
                 cprint("! Failed to restore key: %s" % key, 'red')
                 errors += 1
-                pass
-    cprint("Migrated %d keys" % (len(keys) - errors), 'green')
+                continue # Don't delete the key in src if it failed to restore - move on to the next iteration
+            if CLEAN_UP:
+                if DEBUG:
+                    cprint("Deleting source key: %s" % key, output_color)
+                src.delete(key)
+
+    if not DRY_RUN:
+        cprint("Migrated %d keys" % (len(keys) - errors), output_color)
 
 
 def run():
