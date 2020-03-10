@@ -10,6 +10,8 @@ Default Dockerfile command: `ruby migrate.rb`
 docker run --env "SIDEKIQ_OLD_REDIS_URL=redis://host/database" --env "SIDEKIQ_NEW_REDIS_URL=redis://host/database" artsy/sidekiq-migrate:latest
 ```
 
+See full playbook for sidekiq migrations in [README/migrating-sidekiq](https://github.com/artsy/README/blob/master/playbooks/migrating-sidekiq.md).
+
 ### Required enviornment variables:
 
 - `SIDEKIQ_OLD_REDIS_URL`
