@@ -14,7 +14,7 @@ ARCHIVE_NAME=$1
 
 if test -z "$2"
 then
-  PG_RESTORE_ARGS="--clean --no-owner --no-privileges --schema=public"
+  PG_RESTORE_ARGS="--clean --no-owner --no-privileges --schema=public -v"
 else
   PG_RESTORE_ARGS=$2
 fi
