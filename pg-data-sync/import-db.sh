@@ -2,8 +2,6 @@
 
 # Usage: ./import-db.sh { ARCHIVE_NAME } { PG_RESTORE_ARGS }
 
-set -e
-
 if test -z "$1"
 then
   echo "You must supply an archive name as an argument"
@@ -14,7 +12,7 @@ ARCHIVE_NAME=$1
 
 if test -z "$2"
 then
-  PG_RESTORE_ARGS="--clean --no-owner --no-privileges --schema=public"
+  PG_RESTORE_ARGS="--clean --no-owner --no-privileges --schema=public -v"
 else
   PG_RESTORE_ARGS=$2
 fi
@@ -46,3 +44,9 @@ pg_restore archive.pgdump -d $DATABASE_URL $PG_RESTORE_ARGS
 
 end_datetime=$(date -u +"%D %T %Z")
 echo "[data import] Ended at $end_datetime"
+
+if [ "$SWALLOW_ERRORS_ON_RESTORE" = "1" ]; then
+  exit 0
+else
+  exit $?
+fi

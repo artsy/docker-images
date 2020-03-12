@@ -14,7 +14,7 @@ ARCHIVE_NAME=$1
 
 if test -z "$2"
 then
-  PG_DUMP_ARGS="-O -Fc"
+  PG_DUMP_ARGS="-O -Fc -v"
 else
   PG_DUMP_ARGS=$2
 fi
