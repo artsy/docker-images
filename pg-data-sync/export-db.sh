@@ -40,9 +40,14 @@ fi
 start_datetime=$(date -u +"%D %T %Z")
 echo "[data export] Starting at $start_datetime"
 
-pg_dump -d $DATABASE_URL -f archive.pgdump $PG_DUMP_ARGS
+pg_dump -d $DATABASE_URL -f /tmp/archive.pgdump $PG_DUMP_ARGS
 
-aws s3 cp archive.pgdump s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump
+if [ "$USE_ARCHIVE_TIMESTAMP" = "1" ]; then
+  timestamp=`date +%m-%d-%Y--%l-%M-%S`
+  aws s3 cp /tmp/archive.pgdump s3://artsy-data/$APP_NAME/$ARCHIVE_NAME--$timestamp.pgdump
+else
+  aws s3 cp /tmp/archive.pgdump s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump
+fi
 
 end_datetime=$(date -u +"%D %T %Z")
 echo "[data export] Ended at $end_datetime"
