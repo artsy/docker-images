@@ -42,11 +42,13 @@ aws s3 cp s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump /tmp/archive.pgdump
 
 pg_restore /tmp/archive.pgdump -d $DATABASE_URL $PG_RESTORE_ARGS
 
+PG_EXIT_CODE=$?
+
 end_datetime=$(date -u +"%D %T %Z")
 echo "[data import] Ended at $end_datetime"
 
 if [ "$SWALLOW_ERRORS_ON_RESTORE" = "1" ]; then
   exit 0
 else
-  exit $?
+  exit $PG_EXIT_CODE
 fi
