@@ -55,7 +55,9 @@ end_datetime=$(date -u +"%D %T %Z")
 echo "[pg_restore] Ended at $end_datetime"
 
 if [ "$SWALLOW_ERRORS_ON_RESTORE" = "1" ]; then
+  echo "SWALLOW_ERRORS_ON_RESTORE is 1. Exiting script with return code 0."
   exit 0
 else
+  echo "Exiting script with pg_restore return code of $PG_EXIT_CODE"
   exit $PG_EXIT_CODE
 fi
