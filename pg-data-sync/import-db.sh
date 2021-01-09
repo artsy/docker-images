@@ -39,7 +39,7 @@ start_datetime=$(date -u +"%D %T %Z")
 echo "[S3 download] Starting at $start_datetime"
 
 aws s3 ls s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump
-aws s3 cp ---no-progress s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump /tmp/archive.pgdump
+aws s3 cp --no-progress s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump /tmp/archive.pgdump
 ls -l /tmp/archive.pgdump
 
 end_datetime=$(date -u +"%D %T %Z")
