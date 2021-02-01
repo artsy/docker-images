@@ -1,4 +1,6 @@
-FROM jruby:9.0
+FROM ruby:2.2
+
+RUN apt-get update && apt-get install unzip
 
 RUN curl -L https://bintray.com/rubyrep/rubyrep/download_file?file_path=rubyrep-2.0.1.zip -o /tmp/rubyrep-2.0.1.zip
 
