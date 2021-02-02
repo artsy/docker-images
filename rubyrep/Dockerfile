@@ -1,9 +1,16 @@
-FROM jruby:9.0
+FROM ruby:2.6.5-alpine3.10
 
-RUN curl -L https://bintray.com/rubyrep/rubyrep/download_file?file_path=rubyrep-2.0.1.zip -o /tmp/rubyrep-2.0.1.zip
+WORKDIR /rubyrep
 
-RUN unzip /tmp/rubyrep-2.0.1.zip -d /
+RUN apk update && apk --no-cache --quiet add --update \
+      build-base \
+      postgresql-dev \
+      bash
 
-WORKDIR /rubyrep-2.0.1
+COPY .ruby-version Gemfile* ./
+
+RUN gem install bundler && \
+    bundle install --frozen --jobs $(nproc)
 
 CMD ["/rubyrep-2.0.1/rubyrep", "--verbose", "scan", "-c", "/mnt/default.conf", "--summary"]
+
