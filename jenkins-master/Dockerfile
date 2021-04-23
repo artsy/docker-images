@@ -38,6 +38,14 @@ RUN apt-get update -qq && apt-get install -y \
 
 RUN pip3 install hokusai
 
+# python2
+RUN apt-get update -qq && apt-get install -y \
+  python-pip
+
+# virtualenv
+RUN apt-get update -qq && apt-get install -y \
+  virtualenv
+
 # dumb-init
 RUN apt-get update -qq && apt-get install -y \
   dumb-init
