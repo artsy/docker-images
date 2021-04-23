@@ -33,7 +33,8 @@ RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | a
 # python3
 RUN apt-get update -qq && apt-get install -y \
   python3 \
-  python3-pip
+  python3-pip \
+  python3-venv
 
 RUN pip3 install hokusai
 
