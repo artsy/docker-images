@@ -55,6 +55,11 @@ RUN mkdir /opt/jenkins && \
     wget --quiet -O /opt/jenkins/jenkins-1.658.war https://s3.amazonaws.com/artsy-provisioning-public/jenkins-1.658.war && \
     ln -s /opt/jenkins/jenkins-1.658.war /opt/jenkins/jenkins.war
 
+# iam authenticator
+RUN curl -s -o /tmp/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator && \
+    chmod +x /tmp/aws-iam-authenticator && \
+    mv /tmp/aws-iam-authenticator /usr/local/bin
+
 # jenkins user/group
 RUN groupadd -g 1000 jenkins && \
     useradd -d /var/lib/jenkins -u 1000 -g 1000 -m -s /bin/bash jenkins && \
