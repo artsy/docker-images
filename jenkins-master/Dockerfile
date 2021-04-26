@@ -40,6 +40,7 @@ RUN pip3 install hokusai
 
 # python2
 RUN apt-get update -qq && apt-get install -y \
+  python2 \
   python-pip
 
 # virtualenv
