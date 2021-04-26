@@ -66,9 +66,13 @@ RUN groupadd -g 1000 jenkins && \
     useradd -d /var/lib/jenkins -u 1000 -g 1000 -m -s /bin/bash jenkins && \
     chown -R jenkins:jenkins /var/lib/jenkins
 
+# launch script.
+COPY --chown=jenkins:jenkins jenkins.sh /opt/jenkins
+RUN chmod +x /opt/jenkins/jenkins.sh
+
 USER jenkins
 WORKDIR /var/lib/jenkins
 
 # entrypoint
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["java", "-Djava.awt.headless=true", "-XX:MaxPermSize=512m", "-XX:+CMSPermGenSweepingEnabled", "-XX:+CMSClassUnloadingEnabled", "-XX:+UseConcMarkSweepGC", "-jar", "/opt/jenkins/jenkins-1.658.war", "--httpPort=8080", "--httpListenAddress=0.0.0.0", "--ajp13Port=-1"]
+CMD ["/opt/jenkins/jenkins.sh"]
