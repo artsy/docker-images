@@ -36,12 +36,13 @@ RUN apt-get update -qq && apt-get install -y \
   python3-pip \
   python3-venv
 
-RUN pip3 install hokusai
-
 # python2
 RUN apt-get update -qq && apt-get install -y \
   python2 \
   python-pip
+
+# hokusai py2
+RUN pip install hokusai
 
 # virtualenv
 RUN apt-get update -qq && apt-get install -y \
