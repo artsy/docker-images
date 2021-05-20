@@ -1,0 +1,103 @@
+FROM debian:stretch-slim
+
+RUN set -ex; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		gnupg2 \
+		dirmngr \
+	; \
+	rm -rf /var/lib/apt/lists/*
+
+# add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
+RUN groupadd -r rabbitmq && useradd -r -d /var/lib/rabbitmq -m -g rabbitmq rabbitmq
+
+# grab gosu for easy step-down from root
+ENV GOSU_VERSION 1.10
+RUN set -x \
+	&& apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
+	&& wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture)" \
+	&& wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$(dpkg --print-architecture).asc" \
+	&& export GNUPGHOME="$(mktemp -d)" \
+	&& gpg --keyserver keys.gnupg.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+	&& gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+	&& rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc \
+	&& chmod +x /usr/local/bin/gosu \
+	&& gosu nobody true \
+	&& apt-get purge -y --auto-remove ca-certificates wget
+
+# install Erlang
+RUN set -ex; \
+	apt-get update; \
+# "erlang-base-hipe" is optional (and only supported on a few arches)
+# so, only install it if it's available for our current arch
+	if apt-cache show erlang-base-hipe 2>/dev/null | grep -q 'Package: erlang-base-hipe'; then \
+		apt-get install -y --no-install-recommends \
+			erlang-base-hipe \
+		; \
+	fi; \
+# we start with "erlang-base-hipe" because it and "erlang-base" (non-hipe) are exclusive
+	apt-get install -y --no-install-recommends \
+		erlang-asn1 \
+		erlang-crypto \
+		erlang-eldap \
+		erlang-inets \
+		erlang-mnesia \
+		erlang-nox \
+		erlang-os-mon \
+		erlang-public-key \
+		erlang-ssl \
+		erlang-xmerl \
+	; \
+	rm -rf /var/lib/apt/lists/*
+
+# get logs to stdout (thanks @dumbbell for pushing this upstream! :D)
+ENV RABBITMQ_LOGS=- RABBITMQ_SASL_LOGS=-
+# https://github.com/rabbitmq/rabbitmq-server/commit/53af45bf9a162dec849407d114041aad3d84feaf
+
+RUN apt-get update && apt-get install -y curl
+RUN curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.deb.sh | bash
+
+ENV RABBITMQ_VERSION 3.6.15
+ENV RABBITMQ_DEBIAN_VERSION 3.6.15-1
+
+RUN apt-get update
+RUN apt-cache madison rabbitmq-server
+
+RUN apt-get install -y --no-install-recommends \
+		rabbitmq-server=$RABBITMQ_DEBIAN_VERSION \
+	&& rm -rf /var/lib/apt/lists/*
+
+# /usr/sbin/rabbitmq-server has some irritating behavior, and only exists to "su - rabbitmq /usr/lib/rabbitmq/bin/rabbitmq-server ..."
+ENV PATH /usr/lib/rabbitmq/bin:$PATH
+
+# set home so that any `--user` knows where to put the erlang cookie
+ENV HOME /var/lib/rabbitmq
+
+RUN mkdir -p /var/lib/rabbitmq /etc/rabbitmq \
+	&& chown -R rabbitmq:rabbitmq /var/lib/rabbitmq /etc/rabbitmq \
+	&& chmod -R 777 /var/lib/rabbitmq /etc/rabbitmq
+VOLUME /var/lib/rabbitmq
+
+# add a symlink to the .erlang.cookie in /root so we can "docker exec rabbitmqctl ..." without gosu
+RUN ln -sf /var/lib/rabbitmq/.erlang.cookie /root/
+
+RUN set -x \
+	&& apt-get update && apt-get install -y --no-install-recommends wget unzip \
+	&& rm -rf /var/lib/apt/lists/*
+
+COPY rabbitmq_delayed_message_exchange-20171215-3.6.x.ez /usr/lib/rabbitmq/lib/rabbitmq_server-3.6.15/plugins/rabbitmq_delayed_message_exchange-20171215-3.6.x.ez
+
+RUN ln -sf /usr/lib/rabbitmq/lib/rabbitmq_server-$RABBITMQ_VERSION/plugins /plugins
+
+RUN rabbitmq-plugins enable --offline rabbitmq_management
+RUN rabbitmq-plugins enable rabbitmq_federation
+RUN rabbitmq-plugins enable rabbitmq_federation_management
+RUN rabbitmq-plugins enable rabbitmq_trust_store
+RUN rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+EXPOSE 4369 5671 5672 25672 15671 15672
+CMD ["rabbitmq-server"]
