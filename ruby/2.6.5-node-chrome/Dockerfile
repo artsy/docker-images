@@ -1,5 +1,8 @@
 FROM ruby:2.6.5
 
+# Work-around for expired root cert.
+RUN sed -i '/^mozilla\/DST_Root_CA_X3/s/^/!/' /etc/ca-certificates.conf && update-ca-certificates -f
+
 # Install NodeJS apt sources
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 
