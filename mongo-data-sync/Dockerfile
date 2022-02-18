@@ -1,4 +1,4 @@
-FROM mongo:4.2
+FROM mongo:4.4
 
 RUN apt-get update -qq && apt-get install -y awscli && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
