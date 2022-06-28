@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+
+# Usage:
+# ./push 1.2.0-1
+# or
+# ./push latest
+
+
+docker push artsy/detect-secrets:$1

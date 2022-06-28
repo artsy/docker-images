@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+
+# Usage:
+# ./build 1.2.0-1
+# or
+# ./build latest
+
+
+docker build -t artsy/detect-secrets:$1 .
