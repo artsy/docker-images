@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 
 
-ARG toolVersion=1.2.0
+ARG toolVersion=1.3.0
 ARG ourVersion=1
 
 LABEL version="$toolVersion-$ourVersion"
