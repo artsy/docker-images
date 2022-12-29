@@ -1,11 +1,56 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-
 # Usage:
+# ./build
+# or
 # ./build 1.2.0-1
 # or
 # ./build latest
 
+ALLOWED_ARGS="[0-9]+\.[0-9]+\.[0-9]+\-[0-9]+|latest|ci"
 
-docker build -t artsy/detect-secrets:$1 .
+TOOL_VERSION=
+ARTSY_VERSION=
+TAG=
+
+# If more than one argument is passed, exit
+if [[ $# -gt 1 ]]; then
+  echo "Usage: ./build"
+  echo "or"
+  echo "Usage: ./build [version]"
+  exit 1
+fi
+
+# If an argument is passed, set the TAG to the argument
+if [[ $# -eq 1 ]]; then
+  # If the argument is not of the form 1.2.3-1, latest, or ci, exit
+  if [[ ! $1 =~ $ALLOWED_ARGS ]]; then
+    echo "Invalid argument: $1"
+    echo "Valid argument formats: 1.2.3-1, latest, ci"
+    exit 1
+  fi
+  TAG=$1
+fi
+
+# If no arguments are passed, build the version specified in the Dockerfile
+if [[ $# -eq 0 ]]; then
+  # extract the tool version from the Dockerfile ARG (e.g. 1.2.0)
+  TOOL_VERSION=$(cat Dockerfile | grep 'ARG toolVersion' | cut -d '=' -f 2)
+  # extract the artsy version from the Dockerfile ARG (e.g. 1)
+  ARTSY_VERSION=$(cat Dockerfile | grep 'ARG artsyVersion' | cut -d '=' -f 2)
+  TAG=$TOOL_VERSION-$ARTSY_VERSION
+fi
+
+echo "Building artsy/detect-secrets:$TAG"
+docker build -t artsy/detect-secrets:$TAG .
+
+if [[ $TAG != latest ]]; then
+  echo "Tag artsy/detect-secrets:latest"
+  docker tag artsy/detect-secrets:$TAG artsy/detect-secrets:latest
+fi
+
+if [[ $TAG != ci ]]; then
+  echo "Tag artsy/detect-secrets:ci"
+  docker tag artsy/detect-secrets:$TAG artsy/detect-secrets:ci
+fi

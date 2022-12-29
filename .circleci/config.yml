@@ -1,0 +1,34 @@
+version: 2.1
+jobs:
+  build_detect_secrets:
+    docker:
+      - image: cimg/base:stable
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+    resource_class: small
+    environment:
+      PIP_ROOT_USER_ACTION: ignore
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.18
+      - run:
+          name: Build and tag
+          command: |
+            echo 'print the environment'
+            env
+            echo 'print docker images'
+            docker images
+            echo 'enter the detect-secrets directory'
+            cd detect-secrets
+            echo 'list the directory'
+            ls -la
+            echo 'build and tag'
+            ./build
+            docker images
+
+workflows:
+  detect_secrets:
+    jobs:
+      - build_detect_secrets
