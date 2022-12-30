@@ -2,9 +2,9 @@ FROM --platform=linux/amd64 python:3.10-slim
 
 
 ARG toolVersion=1.4.0
-ARG ourVersion=1
+ARG artsyVersion=1
 
-LABEL version="$toolVersion-$ourVersion"
+LABEL version="$toolVersion-$artsyVersion"
 LABEL org.opencontainers.image.authors="Artsy"
 
 
