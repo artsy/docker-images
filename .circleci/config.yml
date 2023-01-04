@@ -1,34 +1,71 @@
 version: 2.1
 jobs:
-  build_detect_secrets:
+  detect_secrets_build:
     docker:
       - image: cimg/base:stable
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
     resource_class: small
-    environment:
-      PIP_ROOT_USER_ACTION: ignore
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.18
+          docker_layer_caching: true
       - run:
-          name: Build and tag
+          name: Build and check version
           command: |
-            echo 'print the environment'
-            env
-            echo 'print docker images'
-            docker images
-            echo 'enter the detect-secrets directory'
             cd detect-secrets
-            echo 'list the directory'
-            ls -la
-            echo 'build and tag'
-            ./build
-            docker images
+            ./build latest
+            TOOL_VERSION=$(cat Dockerfile | grep 'ARG toolVersion' | cut -d '=' -f 2)
+            BUILD_VERSION=$(docker run artsy/detect-secrets:latest detect-secrets --version)
+            if [[ $BUILD_VERSION == $TOOL_VERSION ]]; then
+              echo "detect-secrets build matches tool version: $BUILD_VERSION"
+            else
+              echo "build version does not match tool version"
+              echo build version: $BUILD_VERSION
+              echo tool version: $TOOL_VERSION
+              exit 1
+            fi
+
+  detect_secrets_push:
+    docker:
+      - image: cimg/base:stable
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+    resource_class: small
+    steps:
+    - checkout
+    - setup_remote_docker:
+        docker_layer_caching: true
+    - run:
+        name: Tag and push
+        command: |
+          cd detect-secrets
+          export TAG=$(date +%Y%m%d).$(echo $CIRCLE_BUILD_NUM)
+          docker tag artsy/detect-secrets:latest artsy/detect-secrets:$TAG
+          docker tag artsy/detect-secrets:latest artsy/detect-secrets:ci
+          ./push $TAG
+          ./push ci
+          ./push latest
+
+only_detect_secrets: &only_detect_secrets
+  filters:
+    branches:
+      only:
+        - /.*detect-secrets.*/
 
 workflows:
-  detect_secrets:
+  detect-secrets:
     jobs:
-      - build_detect_secrets
+      - detect_secrets_build:
+          <<: *only_detect_secrets
+      - hold:
+          <<: *only_detect_secrets
+          type: approval
+          requires:
+            - detect_secrets_build
+      - detect_secrets_push:
+          <<: *only_detect_secrets
+          requires:
+            - hold

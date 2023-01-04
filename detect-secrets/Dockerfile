@@ -7,6 +7,7 @@ ARG artsyVersion=1
 LABEL version="$toolVersion-$artsyVersion"
 LABEL org.opencontainers.image.authors="Artsy"
 
+ENV PIP_ROOT_USER_ACTION=ignore
 
 RUN apt-get update && apt-get install -y \
   --no-install-recommends \
