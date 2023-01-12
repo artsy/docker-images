@@ -60,6 +60,8 @@ workflows:
     jobs:
       - detect_secrets_build:
           <<: *only_detect_secrets
+          context:
+            - docker
       - hold:
           <<: *only_detect_secrets
           type: approval
@@ -67,5 +69,7 @@ workflows:
             - detect_secrets_build
       - detect_secrets_push:
           <<: *only_detect_secrets
+          context:
+            - docker
           requires:
             - hold
