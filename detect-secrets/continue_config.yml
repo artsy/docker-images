@@ -1,0 +1,84 @@
+version: 2.1
+
+parameters:
+  detect-secrets:
+    type: boolean
+    default: false
+
+jobs:
+  detect_secrets_build:
+    docker:
+      - image: cimg/base:stable
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+    resource_class: small
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and validate version
+          command: |
+            cd detect-secrets
+            export TAG=$(date +%Y%m%d).$(echo $CIRCLE_BUILD_NUM)
+            ./build $TAG
+            TOOL_VERSION=$(cat Dockerfile | grep 'ARG toolVersion' | cut -d '=' -f 2)
+            BUILD_VERSION=$(docker run artsy/detect-secrets:$TAG detect-secrets --version)
+            if [[ $BUILD_VERSION == $TOOL_VERSION ]]; then
+              echo "detect-secrets build matches specified tool version: $BUILD_VERSION"
+            else
+              echo "build version does not match specified tool version"
+              echo build version: $BUILD_VERSION
+              echo tool version: $TOOL_VERSION
+              exit 1
+            fi
+
+  detect_secrets_build_tag_push:
+    docker:
+      - image: cimg/base:stable
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+    resource_class: small
+    steps:
+    - checkout
+    - setup_remote_docker
+    - run:
+        name: Build, tag and push
+        command: |
+          cd detect-secrets
+          export TAG=$(date +%Y%m%d).$(echo $CIRCLE_BUILD_NUM)
+          ./build $TAG
+          docker tag artsy/detect-secrets:$TAG artsy/detect-secrets:latest
+          docker tag artsy/detect-secrets:$TAG artsy/detect-secrets:ci
+          ./push $TAG
+          ./push ci
+          ./push latest
+
+only_main: &only_main
+  filters:
+    branches:
+      only:
+        - main
+
+not_main: &not_main
+  filters:
+    branches:
+      ignore:
+        - main
+
+workflows:
+  detect-secrets-build:
+    when: << pipeline.parameters.detect-secrets >>
+    jobs:
+      - detect_secrets_build:
+          <<: *not_main
+          context:
+            - docker
+  detect-secrets-release:
+    when: << pipeline.parameters.detect-secrets >>
+    jobs:
+      - detect_secrets_build_tag_push:
+          <<: *only_main
+          context:
+            - docker

@@ -1,73 +1,17 @@
 version: 2.1
-jobs:
-  detect_secrets_build:
-    docker:
-      - image: cimg/base:stable
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
-    resource_class: small
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Build and check version
-          command: |
-            cd detect-secrets
-            ./build latest
-            TOOL_VERSION=$(cat Dockerfile | grep 'ARG toolVersion' | cut -d '=' -f 2)
-            BUILD_VERSION=$(docker run artsy/detect-secrets:latest detect-secrets --version)
-            if [[ $BUILD_VERSION == $TOOL_VERSION ]]; then
-              echo "detect-secrets build matches tool version: $BUILD_VERSION"
-            else
-              echo "build version does not match tool version"
-              echo build version: $BUILD_VERSION
-              echo tool version: $TOOL_VERSION
-              exit 1
-            fi
 
-  detect_secrets_push:
-    docker:
-      - image: cimg/base:stable
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
-    resource_class: small
-    steps:
-    - checkout
-    - setup_remote_docker
-    - run:
-        name: Tag and push
-        command: |
-          cd detect-secrets
-          export TAG=$(date +%Y%m%d).$(echo $CIRCLE_BUILD_NUM)
-          docker tag artsy/detect-secrets:latest artsy/detect-secrets:$TAG
-          docker tag artsy/detect-secrets:latest artsy/detect-secrets:ci
-          ./push $TAG
-          ./push ci
-          ./push latest
+# enable CircleCI dynamic configuration
+setup: true
 
-only_detect_secrets: &only_detect_secrets
-  filters:
-    branches:
-      only:
-        - /.*detect-secrets.*/
+orbs:
+  path-filtering: circleci/path-filtering@0.1.3
 
 workflows:
-  detect-secrets:
+  always-run:
     jobs:
-      - detect_secrets_build:
-          <<: *only_detect_secrets
-          context:
-            - docker
-      - hold:
-          <<: *only_detect_secrets
-          type: approval
-          requires:
-            - detect_secrets_build
-      - detect_secrets_push:
-          <<: *only_detect_secrets
-          context:
-            - docker
-          requires:
-            - hold
+      - path-filtering/filter:
+          name: detect-secrets
+          mapping: |
+            detect-secrets/.* detect-secrets true
+          base-revision: main
+          config-path: detect-secrets/continue_config.yml
