@@ -12,6 +12,6 @@ workflows:
       - path-filtering/filter:
           name: detect-secrets
           mapping: |
-            detect-secrets/.* detect-secrets true
+            detect-secrets/Dockerfile detect-secrets true
           base-revision: main
           config-path: detect-secrets/continue_config.yml
