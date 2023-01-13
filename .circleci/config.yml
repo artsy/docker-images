@@ -9,8 +9,7 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - setup_remote_docker
       - run:
           name: Build and check version
           command: |
@@ -36,8 +35,7 @@ jobs:
     resource_class: small
     steps:
     - checkout
-    - setup_remote_docker:
-        docker_layer_caching: true
+    - setup_remote_docker
     - run:
         name: Tag and push
         command: |
