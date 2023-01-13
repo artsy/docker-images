@@ -14,9 +14,7 @@ set -euo pipefail
 
 ALLOWED_ARGS="[0-9]+\.[0-9]+\.[0-9]+\-[0-9]+|^[0-9]{8}.[0-9]{1,}$|latest|ci"
 
-TAG=
-
-# If more than one argument is passed, exit
+# If more than one parameter is passed, exit
 if [[ $# -gt 1 ]]; then
   echo "Usage: ./build"
   echo "or"
@@ -24,20 +22,17 @@ if [[ $# -gt 1 ]]; then
   exit 1
 fi
 
-# If an argument is passed, set the TAG to the argument
+# Check if a parameter is passed
 if [[ $# -eq 1 ]]; then
-  # If the argument is not of the allowed format, exit
+  # When a parameter is not of the allowed format, print a message and exit
   if [[ ! $1 =~ $ALLOWED_ARGS ]]; then
-    echo "Invalid argument: $1"
-    echo "Allowed argument format(s): 1.2.3-1, 20230101.1, latest, ci"
+    echo "Invalid parameter: $1"
+    echo "Allowed parameter format(s): 1.2.3-1, 20230101.1, latest, ci"
     exit 1
   fi
-  TAG=$1
 fi
 
-# If no arguments are passed, set the TAG to: current-date.seconds (20230101.123)
-if [[ $# -eq 0 ]]; then
-  TAG=$(date +%Y%m%d).$(date +%s)
-fi
+# Set TAG to passed parameter otherwise default to current-date.seconds (20230101.123)
+TAG=${1:-$(date +%Y%m%d).$(date +%s)}
 
 docker build -t artsy/detect-secrets:$TAG .
