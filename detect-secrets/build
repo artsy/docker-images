@@ -1,11 +1,38 @@
 #!/usr/bin/env bash
-set -euxo pipefail
-
+set -euo pipefail
 
 # Usage:
+# ./build
+# or
 # ./build 1.2.0-1
 # or
+# ./build 20230101.1
+# or
 # ./build latest
+# or
+# ./build ci
 
+ALLOWED_ARGS="[0-9]+\.[0-9]+\.[0-9]+\-[0-9]+|^[0-9]{8}.[0-9]{1,}$|latest|ci"
 
-docker build -t artsy/detect-secrets:$1 .
+# If more than one parameter is passed, exit
+if [[ $# -gt 1 ]]; then
+  echo "Usage: ./build"
+  echo "or"
+  echo "Usage: ./build [version]"
+  exit 1
+fi
+
+# Check if a parameter is passed
+if [[ $# -eq 1 ]]; then
+  # When a parameter is not of the allowed format, print a message and exit
+  if [[ ! $1 =~ $ALLOWED_ARGS ]]; then
+    echo "Invalid parameter: $1"
+    echo "Allowed parameter format(s): 1.2.3-1, 20230101.1, latest, ci"
+    exit 1
+  fi
+fi
+
+# Set TAG to passed parameter otherwise default to current-date.seconds (20230101.123)
+TAG=${1:-$(date +%Y%m%d).$(date +%s)}
+
+docker build -t artsy/detect-secrets:$TAG .

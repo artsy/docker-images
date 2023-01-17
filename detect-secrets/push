@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
-set -euxo pipefail
-
+set -euo pipefail
 
 # Usage:
 # ./push 1.2.0-1
 # or
 # ./push latest
 
+TAG=
 
-docker push artsy/detect-secrets:$1
+# if argument is passed, set the TAG to the argument
+if [[ $# -eq 1 ]]; then
+  TAG=$1
+else
+  echo "Usage: ./push [version]"
+  exit 1
+fi
+
+docker push artsy/detect-secrets:$TAG

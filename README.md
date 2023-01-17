@@ -2,6 +2,8 @@
 
 Public Docker images for Artsy applications
 
+> CI has been configured to use [dynamic configuration](https://circleci.com/docs/using-dynamic-configuration/) and [circleci/path-filtering orb](https://circleci.com/developer/orbs/orb/circleci/path-filtering).
+
 ## Adding an image to Docker Hub
 
 Adding an image to Docker Hub is a two-step process, first you build a new tag
