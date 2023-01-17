@@ -51,6 +51,7 @@ jobs:
           ./build $TAG
           docker tag artsy/detect-secrets:$TAG artsy/detect-secrets:latest
           docker tag artsy/detect-secrets:$TAG artsy/detect-secrets:ci
+          echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
           ./push $TAG
           ./push ci
           ./push latest
