@@ -1,8 +1,8 @@
 FROM ruby:3.0.2-alpine3.13
 
 # Install Node + Yarn
-ENV NODE_VERSION 16.18.0
-ENV YARN_VERSION 1.22.5
+ENV NODE_VERSION 18.14.0
+ENV YARN_VERSION 1.22.19
 
 RUN addgroup -g 1000 node \
   && adduser -u 1000 -G node -s /bin/sh -D node \
@@ -25,3 +25,4 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   && ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
   && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
   && apk del .build-deps-yarn
+
