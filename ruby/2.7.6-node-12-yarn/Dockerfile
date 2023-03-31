@@ -15,7 +15,7 @@ RUN addgroup -g 1000 node \
   && apk del .build-deps
 
 RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
-   && wget -qO- https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --import \
+  && wget -qO- https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --import \
   && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
   && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
   && gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
