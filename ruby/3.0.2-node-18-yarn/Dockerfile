@@ -1,7 +1,7 @@
 FROM ruby:3.0.2-alpine3.13
 
 # Install Node + Yarn
-ENV NODE_VERSION 18.0.0
+ENV NODE_VERSION 18.15.0
 ENV YARN_VERSION 1.22.5
 
 RUN addgroup -g 1000 node \
