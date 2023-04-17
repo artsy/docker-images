@@ -10,7 +10,7 @@ Adding an image to Docker Hub is a two-step process, first you build a new tag
 and then you push it up, here's an example:
 
 ```
-$ docker build -t artsy/ruby:2.5.3-node-chrome ruby/2.5.3-node-chrome/
+$ docker build -t artsy/ruby:2.5.3-node-chrome ruby/2.5.3-node-chrome/ --platform linux/amd64
 $ docker push artsy/ruby:2.5.3-node-chrome
 ```
 
