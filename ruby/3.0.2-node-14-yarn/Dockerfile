@@ -1,4 +1,4 @@
-FROM ruby:3.0.2-alpine3.13
+FROM ruby:3.0.2-alpine3.14
 
 # Install Node + Yarn
 ENV NODE_VERSION 14.17.4
