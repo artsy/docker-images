@@ -31,10 +31,18 @@ then
   exit 1
 fi
 
-if test -z "$AWS_ACCESS_KEY_ID" || test -z "$AWS_SECRET_ACCESS_KEY"
+# if AWS_ID and AWS_SECRET are set and not empty, use them
+# otherwise, use the standard AWS credentials from the env
+if test -n "$AWS_ID" && test -n "$AWS_SECRET"
 then
-  echo "AWS credentials must be set!"
-  exit 1
+  export AWS_ACCESS_KEY_ID=$AWS_ID
+  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET
+else
+  if test -z "$AWS_ACCESS_KEY_ID" || test -z "$AWS_SECRET_ACCESS_KEY"
+  then
+    echo "AWS credentials must be set!"
+    exit 1
+  fi
 fi
 
 start_datetime=$(date -u +"%D %T %Z")
