@@ -1,4 +1,3 @@
-# This Dockerfile is used to build the image for execution in AWS Batch jobs.
 FROM postgres:12
 
 RUN apt-get update -qq && apt-get install -y curl unzip mandoc && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
