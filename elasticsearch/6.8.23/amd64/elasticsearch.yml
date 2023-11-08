@@ -1,0 +1,14 @@
+cluster.name: "docker-cluster"
+
+discovery.type: "single-node"
+xpack.security.enabled: false
+bootstrap.memory_lock: true
+
+# When running on arm64 hardware, consider enabling this option if you start seeing
+# system call filter failures preventing Elasticsearch startup.
+# https://www.elastic.co/guide/en/elasticsearch/reference/6.8/_system_call_filter_check.html
+#
+# bootstrap.system_call_filter: false
+
+http.host: 0.0.0.0
+transport.host: 0.0.0.0

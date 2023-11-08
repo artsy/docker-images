@@ -1,0 +1,9 @@
+cluster.name: "docker-cluster"
+
+discovery.type: "single-node"
+xpack.security.enabled: false
+xpack.ml.enabled: false
+bootstrap.memory_lock: true
+
+http.host: 0.0.0.0
+transport.host: 0.0.0.0
