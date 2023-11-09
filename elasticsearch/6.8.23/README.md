@@ -2,8 +2,16 @@
 
 Artsy custom Elasticsearch image is available for the following linux architectures: `amd64`, `arm64`
 
+Download:
+
 ```
 docker pull artsy/elasticsearch:6.8.23
+```
+
+Run:
+
+```
+docker run --rm -p 9200:9200 -p 9300:9300 -e http.cors.enabled=true -e http.cors.allow-origin='*' -e ES_JAVA_OPTS='-Xms512m -Xmx512m' artsy/elasticsearch:6.8.23
 ```
 
 ## Custom Elasticsearch v6.8.23 image(s)
