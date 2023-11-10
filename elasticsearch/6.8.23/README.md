@@ -20,7 +20,7 @@ The [official Elasticsearch docker repository](https://hub.docker.com/_/elastics
 
 Included below are commands for building and pushing images:
 
-> docker login is _required_ to access artsy repository
+> `docker login` is _required_ to access the artsy repository. credentials are located under "Docker" entry in 1password
 
 > add `--platform linux/amd64` option to the `docker build` command when building `amd64` image on `arm64` hardware
 ```
