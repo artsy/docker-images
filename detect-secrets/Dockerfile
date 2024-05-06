@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 python:3.10-slim
 
 
-ARG toolVersion=1.4.0
+ARG toolVersion=1.5.0
 ARG artsyVersion=1
 
 LABEL version="$toolVersion-$artsyVersion"
