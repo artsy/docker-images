@@ -9,5 +9,6 @@ RUN rm -rf awscliv2.zip aws
 
 ADD export-db.sh .
 ADD import-db.sh .
+ADD load-secrets-and-run.sh /usr/local/bin/load-secrets-and-run.sh
 
 CMD ["sh", "./export-db.sh", "latest"]
