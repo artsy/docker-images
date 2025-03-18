@@ -1,5 +1,5 @@
 project := pg-data-sync
-image_tag ?= 12
+image_tag ?= 14.12
 
 help:
 	@echo 'Commands:'

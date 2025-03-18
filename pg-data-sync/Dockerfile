@@ -1,4 +1,4 @@
-FROM postgres:12
+FROM postgres:14.12
 
 RUN apt-get update -qq && apt-get install -y curl unzip mandoc dumb-init && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
