@@ -58,7 +58,7 @@ start_datetime=$(date -u +"%D %T %Z")
 echo "[S3 upload] Starting at $start_datetime"
 
 if [ "$USE_ARCHIVE_TIMESTAMP" = "1" ]; then
-  timestamp=`date +%m-%d-%Y--%l-%M-%S`
+  timestamp=`date +%m-%d-%Y--%H-%M-%S`
   aws s3 cp --no-progress /tmp/archive.pgdump s3://artsy-data/$APP_NAME/$ARCHIVE_NAME--$timestamp.pgdump
   aws s3 ls s3://artsy-data/$APP_NAME/$ARCHIVE_NAME--$timestamp.pgdump
 else
