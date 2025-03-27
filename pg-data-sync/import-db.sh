@@ -10,12 +10,14 @@ fi
 
 ARCHIVE_NAME=$1
 
-if test -z "$2"
-then
-  PG_RESTORE_ARGS="--clean --if-exists --no-owner --no-privileges --schema=public -v"
+if [ $# -gt 1 ]; then
+  PG_RESTORE_ARGS="${@:2}"
 else
-  PG_RESTORE_ARGS=$2
+  PG_RESTORE_ARGS="--clean --if-exists --no-owner --no-privileges --schema=public -v"
 fi
+
+echo "Using archive name: $ARCHIVE_NAME"
+echo "Running pg_restore with args: $PG_RESTORE_ARGS"
 
 if test -z "$DATABASE_URL"
 then
