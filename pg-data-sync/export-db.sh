@@ -46,17 +46,17 @@ else
 fi
 
 start_datetime=$(date -u +"%D %T %Z")
-echo "[pg_dump] Starting at $start_datetime"
+echo "[pg_dump] Starting at: $start_datetime"
 echo "[pg_dump] Running with args: $PG_DUMP_ARGS"
 
 pg_dump -d $DATABASE_URL -f /tmp/archive.pgdump $PG_DUMP_ARGS
 ls -l /tmp/archive.pgdump
 
 end_datetime=$(date -u +"%D %T %Z")
-echo "[pg_dump] Ended at $end_datetime"
+echo "[pg_dump] Ended at: $end_datetime"
 
 start_datetime=$(date -u +"%D %T %Z")
-echo "[S3 upload] Starting at $start_datetime"
+echo "[S3 upload] Starting at: $start_datetime"
 
 if [ "$USE_ARCHIVE_TIMESTAMP" = "1" ]; then
   timestamp=`date +%m-%d-%Y--%H-%M-%S`
@@ -68,4 +68,4 @@ else
 fi
 
 end_datetime=$(date -u +"%D %T %Z")
-echo "[S3 upload] Ended at $end_datetime"
+echo "[S3 upload] Ended at: $end_datetime"
