@@ -9,12 +9,12 @@ then
 fi
 
 ARCHIVE_NAME=$1
+echo "Using archive name: $ARCHIVE_NAME"
 
-if test -z "$2"
-then
-  PG_RESTORE_ARGS="--clean --if-exists --no-owner --no-privileges --schema=public -v"
+if [ $# -gt 1 ]; then
+  PG_RESTORE_ARGS="${@:2}"
 else
-  PG_RESTORE_ARGS=$2
+  PG_RESTORE_ARGS="--clean --if-exists --no-owner --no-privileges --schema=public -v"
 fi
 
 if test -z "$DATABASE_URL"
@@ -44,28 +44,29 @@ else
 fi
 
 start_datetime=$(date -u +"%D %T %Z")
-echo "[S3 download] Starting at $start_datetime"
+echo "[S3 download] Starting at: $start_datetime"
 
 aws s3 ls s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump
 aws s3 cp --no-progress s3://artsy-data/$APP_NAME/$ARCHIVE_NAME.pgdump /tmp/archive.pgdump
 ls -l /tmp/archive.pgdump
 
 end_datetime=$(date -u +"%D %T %Z")
-echo "[S3 download] Ended at $end_datetime"
+echo "[S3 download] Ended at: $end_datetime"
 
 start_datetime=$(date -u +"%D %T %Z")
-echo "[pg_restore] Starting at $start_datetime"
+echo "[pg_restore] Starting at: $start_datetime"
+echo "[pg_restore] Running with args: $PG_RESTORE_ARGS"
 
 pg_restore /tmp/archive.pgdump -d $DATABASE_URL $PG_RESTORE_ARGS
 PG_EXIT_CODE=$?
 
 end_datetime=$(date -u +"%D %T %Z")
-echo "[pg_restore] Ended at $end_datetime"
+echo "[pg_restore] Ended at: $end_datetime"
 
 if [ "$SWALLOW_ERRORS_ON_RESTORE" = "1" ]; then
   echo "SWALLOW_ERRORS_ON_RESTORE is 1. Exiting script with return code 0."
   exit 0
 else
-  echo "Exiting script with pg_restore return code of $PG_EXIT_CODE"
+  echo "Exiting script with pg_restore return code of: $PG_EXIT_CODE"
   exit $PG_EXIT_CODE
 fi
