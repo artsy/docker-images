@@ -12,12 +12,14 @@ fi
 
 ARCHIVE_NAME=$1
 
-if test -z "$2"
-then
-  PG_DUMP_ARGS="-O -Fc -v"
+if [ $# -gt 1 ]; then
+  PG_DUMP_ARGS="${@:2}"
 else
-  PG_DUMP_ARGS=$2
+  PG_DUMP_ARGS="-O -Fc -v"
 fi
+
+echo "Using archive name: $ARCHIVE_NAME"
+echo "Running pg_dump with args: $PG_DUMP_ARGS"
 
 if test -z "$DATABASE_URL"
 then
