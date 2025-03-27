@@ -11,15 +11,13 @@ then
 fi
 
 ARCHIVE_NAME=$1
+echo "Using archive name: $ARCHIVE_NAME"
 
 if [ $# -gt 1 ]; then
   PG_DUMP_ARGS="${@:2}"
 else
   PG_DUMP_ARGS="-O -Fc -v"
 fi
-
-echo "Using archive name: $ARCHIVE_NAME"
-echo "Running pg_dump with args: $PG_DUMP_ARGS"
 
 if test -z "$DATABASE_URL"
 then
@@ -49,6 +47,7 @@ fi
 
 start_datetime=$(date -u +"%D %T %Z")
 echo "[pg_dump] Starting at $start_datetime"
+echo "[pg_dump] Running with args: $PG_DUMP_ARGS"
 
 pg_dump -d $DATABASE_URL -f /tmp/archive.pgdump $PG_DUMP_ARGS
 ls -l /tmp/archive.pgdump

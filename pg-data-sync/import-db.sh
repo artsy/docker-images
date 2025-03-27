@@ -9,15 +9,13 @@ then
 fi
 
 ARCHIVE_NAME=$1
+echo "Using archive name: $ARCHIVE_NAME"
 
 if [ $# -gt 1 ]; then
   PG_RESTORE_ARGS="${@:2}"
 else
   PG_RESTORE_ARGS="--clean --if-exists --no-owner --no-privileges --schema=public -v"
 fi
-
-echo "Using archive name: $ARCHIVE_NAME"
-echo "Running pg_restore with args: $PG_RESTORE_ARGS"
 
 if test -z "$DATABASE_URL"
 then
@@ -57,6 +55,7 @@ echo "[S3 download] Ended at $end_datetime"
 
 start_datetime=$(date -u +"%D %T %Z")
 echo "[pg_restore] Starting at $start_datetime"
+echo "[pg_restore] Running with args: $PG_RESTORE_ARGS"
 
 pg_restore /tmp/archive.pgdump -d $DATABASE_URL $PG_RESTORE_ARGS
 PG_EXIT_CODE=$?
