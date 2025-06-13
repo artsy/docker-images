@@ -1,4 +1,4 @@
-FROM ruby:3.4.1-alpine3.21
+FROM ruby:3.3.0-alpine3.18
 
 # Install Node + Yarn
 ENV NODE_VERSION=22.5.1
